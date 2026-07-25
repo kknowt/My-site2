@@ -17,6 +17,9 @@
   --radius-md: 20px;
   --radius-sm: 14px;
   --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --view-duration: 0.72s;
+  --view-ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
+  --view-ease-exit: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 html {
@@ -199,13 +202,19 @@ body {
   padding: 2rem;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(30px) scale(0.98);
-  transition: opacity var(--transition), transform var(--transition), visibility var(--transition);
+  transform: translateY(24px) scale(0.985);
+  transition:
+    opacity var(--view-duration) var(--view-ease-enter),
+    transform var(--view-duration) var(--view-ease-enter),
+    visibility 0s linear var(--view-duration);
   pointer-events: none;
+  will-change: opacity, transform;
 }
 
 .view-active,
-.view-exit {
+.view-exit,
+.view-enter,
+.view-enter-active {
   display: flex;
 }
 
@@ -217,11 +226,51 @@ body {
   position: relative;
   width: 100%;
   min-height: 100vh;
+  transition:
+    opacity var(--view-duration) var(--view-ease-enter),
+    transform var(--view-duration) var(--view-ease-enter),
+    visibility 0s;
 }
 
 .view-exit {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  min-height: 100vh;
   opacity: 0;
-  transform: translateY(-20px) scale(0.98);
+  visibility: visible;
+  transform: translateY(-14px) scale(0.99);
+  pointer-events: none;
+  transition:
+    opacity calc(var(--view-duration) * 0.9) var(--view-ease-exit),
+    transform calc(var(--view-duration) * 0.9) var(--view-ease-exit),
+    visibility 0s linear calc(var(--view-duration) * 0.9);
+}
+
+.view-enter {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  min-height: 100vh;
+  opacity: 0;
+  visibility: visible;
+  transform: translateY(28px) scale(0.982);
+  pointer-events: none;
+}
+
+.view-enter-active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --view-duration: 0.01s;
+  }
+
+  .view {
+    will-change: auto;
+  }
 }
 
 dialog:not([open]) {
@@ -343,7 +392,7 @@ dialog:not([open]) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: transform 0.3s, background 0.3s, box-shadow 0.3s;
+  transition: transform 0.45s var(--view-ease-enter), background 0.35s ease, box-shadow 0.45s var(--view-ease-enter);
 }
 
 .category-card:hover {
