@@ -17,9 +17,14 @@
   --radius-md: 20px;
   --radius-sm: 14px;
   --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  --view-duration: 0.72s;
-  --view-ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
-  --view-ease-exit: cubic-bezier(0.4, 0, 0.2, 1);
+  --view-duration: 1.08s;
+  --view-duration-exit: 0.92s;
+  --view-enter-delay: 0.14s;
+  --view-ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --view-ease-exit: cubic-bezier(0.55, 0.06, 0.25, 1);
+  --content-duration: 0.95s;
+  --content-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --content-stagger: 0.055s;
 }
 
 html {
@@ -202,7 +207,7 @@ body {
   padding: 2rem;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(24px) scale(0.985);
+  transform: translateY(14px) scale(0.992);
   transition:
     opacity var(--view-duration) var(--view-ease-enter),
     transform var(--view-duration) var(--view-ease-enter),
@@ -239,12 +244,12 @@ body {
   min-height: 100vh;
   opacity: 0;
   visibility: visible;
-  transform: translateY(-14px) scale(0.99);
+  transform: translateY(-8px) scale(0.996);
   pointer-events: none;
   transition:
-    opacity calc(var(--view-duration) * 0.9) var(--view-ease-exit),
-    transform calc(var(--view-duration) * 0.9) var(--view-ease-exit),
-    visibility 0s linear calc(var(--view-duration) * 0.9);
+    opacity var(--view-duration-exit) var(--view-ease-exit),
+    transform var(--view-duration-exit) var(--view-ease-exit),
+    visibility 0s linear var(--view-duration-exit);
 }
 
 .view-enter {
@@ -254,22 +259,81 @@ body {
   min-height: 100vh;
   opacity: 0;
   visibility: visible;
-  transform: translateY(28px) scale(0.982);
+  transform: translateY(18px) scale(0.992);
   pointer-events: none;
 }
 
 .view-enter-active {
   opacity: 1;
   transform: translateY(0) scale(1);
+  transition:
+    opacity var(--view-duration) var(--view-ease-enter) var(--view-enter-delay),
+    transform var(--view-duration) var(--view-ease-enter) var(--view-enter-delay),
+    visibility 0s;
+}
+
+@keyframes contentFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#categories.view-enter-active .category-card {
+  animation: contentFadeUp var(--content-duration) var(--content-ease) backwards;
+}
+
+#categories.view-enter-active .category-card:nth-child(1) {
+  animation-delay: calc(var(--view-enter-delay) + var(--content-stagger) * 1);
+}
+
+#categories.view-enter-active .category-card:nth-child(2) {
+  animation-delay: calc(var(--view-enter-delay) + var(--content-stagger) * 2);
+}
+
+#categories.view-enter-active .category-card:nth-child(3) {
+  animation-delay: calc(var(--view-enter-delay) + var(--content-stagger) * 3);
+}
+
+#gallery.view-enter-active .page-header,
+#gallery.view-enter-active .gallery-item,
+#gallery.view-enter-active .empty-state {
+  animation: contentFadeUp var(--content-duration) var(--content-ease) backwards;
+}
+
+#gallery.view-enter-active .page-header {
+  animation-delay: calc(var(--view-enter-delay) + 0.04s);
+}
+
+#gallery.view-enter-active .gallery-item {
+  animation-delay: calc(var(--view-enter-delay) + 0.1s + var(--stagger, 0) * var(--content-stagger));
+}
+
+#gallery.view-enter-active .empty-state {
+  animation-delay: calc(var(--view-enter-delay) + 0.12s);
 }
 
 @media (prefers-reduced-motion: reduce) {
   :root {
     --view-duration: 0.01s;
+    --view-duration-exit: 0.01s;
+    --view-enter-delay: 0s;
+    --content-duration: 0.01s;
   }
 
   .view {
     will-change: auto;
+  }
+
+  #categories.view-enter-active .category-card,
+  #gallery.view-enter-active .page-header,
+  #gallery.view-enter-active .gallery-item,
+  #gallery.view-enter-active .empty-state {
+    animation: none;
   }
 }
 
@@ -370,6 +434,12 @@ dialog:not([open]) {
   font-weight: 600;
   letter-spacing: -0.02em;
   text-align: center;
+  transition: opacity 0.55s var(--content-ease), transform 0.55s var(--content-ease);
+}
+
+.page-header h2.is-updating {
+  opacity: 0;
+  transform: translateY(6px);
 }
 
 .page-header--centered h2 {
@@ -392,11 +462,19 @@ dialog:not([open]) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: transform 0.45s var(--view-ease-enter), background 0.35s ease, box-shadow 0.45s var(--view-ease-enter);
+  transition:
+    transform 0.65s var(--view-ease-enter),
+    background 0.55s ease,
+    box-shadow 0.65s var(--view-ease-enter);
+}
+
+.category-card:active {
+  transform: translateY(-2px) scale(0.995);
+  transition-duration: 0.2s;
 }
 
 .category-card:hover {
-  transform: translateY(-6px) scale(1.02);
+  transform: translateY(-5px) scale(1.015);
   background: rgba(255, 255, 255, 0.18);
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
 }
@@ -442,11 +520,13 @@ dialog:not([open]) {
   border-radius: var(--radius-md);
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition:
+    transform 0.55s var(--content-ease),
+    box-shadow 0.55s var(--content-ease);
 }
 
 .gallery-item:hover {
-  transform: translateY(-4px);
+  transform: translateY(-3px);
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
 }
 
