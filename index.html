@@ -4,6 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portfolio</title>
+  <script>
+    (function () {
+      var path = location.pathname;
+      if (!path.endsWith('/')) {
+        path = /\.[a-z0-9]+$/i.test(path.split('/').pop() || '') ? path.replace(/[^/]+$/, '') : path + '/';
+      }
+      if (path !== '/') {
+        var base = document.createElement('base');
+        base.href = path;
+        document.head.appendChild(base);
+      }
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -27,7 +40,7 @@
         </div>
         <h1 class="welcome-title">Добро пожаловать</h1>
         <p class="welcome-subtitle">Портфолио дизайнера</p>
-        <button class="glass-btn primary" data-nav="categories">
+        <button type="button" class="glass-btn primary" data-nav="categories">
           Далее
           <span class="btn-arrow">→</span>
         </button>
@@ -61,7 +74,7 @@
     <!-- Category gallery -->
     <section id="gallery" class="view">
       <header class="page-header">
-        <button class="glass-btn icon-btn back-btn" data-nav="categories" aria-label="Назад">←</button>
+        <button type="button" class="glass-btn icon-btn back-btn" data-nav="categories" aria-label="Назад">←</button>
         <h2 id="gallery-title">Категория</h2>
       </header>
       <div class="gallery-grid" id="gallery-grid"></div>

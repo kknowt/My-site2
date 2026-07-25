@@ -57,31 +57,38 @@ const PORTFOLIO = {
   }
 };
 (function () {
-  const views = {
-    welcome: document.getElementById('welcome'),
-    categories: document.getElementById('categories'),
-    gallery: document.getElementById('gallery')
-  };
+  'use strict';
 
-  const galleryTitle = document.getElementById('gallery-title');
-  const galleryGrid = document.getElementById('gallery-grid');
+  function init() {
+    const views = {
+      welcome: document.getElementById('welcome'),
+      categories: document.getElementById('categories'),
+      gallery: document.getElementById('gallery')
+    };
 
-  const videoModal = document.getElementById('video-modal');
-  const videoPlayer = document.getElementById('video-player');
-  const videoTitle = document.getElementById('video-title');
-  const videoWrapper = videoPlayer.closest('.video-wrapper');
+    if (!views.welcome || !views.categories || !views.gallery) {
+      return;
+    }
 
-  const pdfModal = document.getElementById('pdf-modal');
-  const pdfViewer = document.getElementById('pdf-viewer');
-  const pdfTitle = document.getElementById('pdf-title');
+    const galleryTitle = document.getElementById('gallery-title');
+    const galleryGrid = document.getElementById('gallery-grid');
 
-  const imageModal = document.getElementById('image-modal');
-  const imageViewer = document.getElementById('image-viewer');
-  const imageTitle = document.getElementById('image-title');
-  const imageWrapper = imageViewer.closest('.image-wrapper');
+    const videoModal = document.getElementById('video-modal');
+    const videoPlayer = document.getElementById('video-player');
+    const videoTitle = document.getElementById('video-title');
+    const videoWrapper = videoPlayer?.closest('.video-wrapper') ?? null;
 
-  let currentView = 'welcome';
-  let currentCategory = null;
+    const pdfModal = document.getElementById('pdf-modal');
+    const pdfViewer = document.getElementById('pdf-viewer');
+    const pdfTitle = document.getElementById('pdf-title');
+
+    const imageModal = document.getElementById('image-modal');
+    const imageViewer = document.getElementById('image-viewer');
+    const imageTitle = document.getElementById('image-title');
+    const imageWrapper = imageViewer?.closest('.image-wrapper') ?? null;
+
+    let currentView = 'welcome';
+    let currentCategory = null;
 
   function sizeMediaFrame(wrapper, mediaW, mediaH) {
     if (!mediaW || !mediaH) return;
@@ -190,6 +197,7 @@ const PORTFOLIO = {
   }
 
   function openVideo(item) {
+    if (!videoModal || !videoPlayer || !videoTitle) return;
     videoTitle.textContent = item.title;
     resetMediaFrame(videoWrapper);
     videoPlayer.src = item.file;
@@ -207,6 +215,7 @@ const PORTFOLIO = {
   }
 
   function openImage(item) {
+    if (!imageModal || !imageViewer || !imageTitle || !imageWrapper) return;
     imageTitle.textContent = item.title;
     imageViewer.alt = item.title;
     resetMediaFrame(imageWrapper);
@@ -226,12 +235,14 @@ const PORTFOLIO = {
     if (categoryKey === 'videos') {
       openVideo(item);
     } else if (categoryKey === 'magazines') {
+      if (!pdfModal || !pdfViewer || !pdfTitle) return;
       pdfTitle.textContent = item.title;
       pdfViewer.src = item.file;
       pdfModal.showModal();
     } else {
       const ext = item.file.split('.').pop().toLowerCase();
       if (ext === 'pdf') {
+        if (!pdfModal || !pdfViewer || !pdfTitle) return;
         pdfTitle.textContent = item.title;
         pdfViewer.src = item.file;
         pdfModal.showModal();
@@ -243,17 +254,18 @@ const PORTFOLIO = {
 
   function closeModal(modalId) {
     const modal = document.getElementById(modalId);
+    if (!modal) return;
     modal.close();
 
-    if (modalId === 'video-modal') {
+    if (modalId === 'video-modal' && videoPlayer && videoWrapper) {
       videoPlayer.pause();
       videoPlayer.onloadedmetadata = null;
       videoPlayer.removeAttribute('src');
       videoPlayer.load();
       resetMediaFrame(videoWrapper);
-    } else if (modalId === 'pdf-modal') {
+    } else if (modalId === 'pdf-modal' && pdfViewer) {
       pdfViewer.removeAttribute('src');
-    } else if (modalId === 'image-modal') {
+    } else if (modalId === 'image-modal' && imageViewer && imageWrapper) {
       imageViewer.onload = null;
       imageViewer.removeAttribute('src');
       resetMediaFrame(imageWrapper);
@@ -261,37 +273,53 @@ const PORTFOLIO = {
   }
 
   window.addEventListener('resize', () => {
-    if (videoModal.open && videoPlayer.videoWidth) {
+    if (videoModal?.open && videoPlayer?.videoWidth && videoWrapper) {
       sizeMediaFrame(videoWrapper, videoPlayer.videoWidth, videoPlayer.videoHeight);
     }
-    if (imageModal.open && imageViewer.naturalWidth) {
+    if (imageModal?.open && imageViewer?.naturalWidth && imageWrapper) {
       sizeMediaFrame(imageWrapper, imageViewer.naturalWidth, imageViewer.naturalHeight);
     }
   });
 
-  document.querySelectorAll('[data-nav]').forEach((btn) => {
-    btn.addEventListener('click', () => navigateTo(btn.dataset.nav));
-  });
+  document.addEventListener('click', (e) => {
+    const navBtn = e.target.closest('[data-nav]');
+    if (navBtn) {
+      navigateTo(navBtn.dataset.nav);
+      return;
+    }
 
-  document.querySelectorAll('.category-card').forEach((card) => {
-    card.addEventListener('click', () => openCategory(card.dataset.category));
-  });
+    const categoryCard = e.target.closest('.category-card');
+    if (categoryCard?.dataset.category) {
+      openCategory(categoryCard.dataset.category);
+      return;
+    }
 
-  document.querySelectorAll('[data-close]').forEach((btn) => {
-    btn.addEventListener('click', () => closeModal(btn.dataset.close));
-  });
+    const closeBtn = e.target.closest('[data-close]');
+    if (closeBtn?.dataset.close) {
+      closeModal(closeBtn.dataset.close);
+      return;
+    }
 
-  [videoModal, pdfModal, imageModal].forEach((modal) => {
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeModal(modal.id);
-    });
+    for (const modal of [videoModal, pdfModal, imageModal]) {
+      if (modal && e.target === modal) {
+        closeModal(modal.id);
+        break;
+      }
+    }
   });
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       [videoModal, pdfModal, imageModal].forEach((modal) => {
-        if (modal.open) closeModal(modal.id);
+        if (modal?.open) closeModal(modal.id);
       });
     }
   });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
