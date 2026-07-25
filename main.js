@@ -122,6 +122,10 @@ const PORTFOLIO = {
     wrapper.style.aspectRatio = '';
   }
 
+  function scrollPageToTop() {
+    window.scrollTo(0, 0);
+  }
+
   function setGalleryTitle(text) {
     if (!galleryTitle) return;
     if (galleryTitle.textContent === text) return;
@@ -141,6 +145,9 @@ const PORTFOLIO = {
     if (!from || !to) return;
 
     isViewTransitioning = true;
+    document.documentElement.classList.add('is-navigating');
+    scrollPageToTop();
+
     to.classList.add('view-enter');
     to.getBoundingClientRect();
 
@@ -159,6 +166,8 @@ const PORTFOLIO = {
       to.classList.add('view-active');
       currentView = viewName;
       isViewTransitioning = false;
+      scrollPageToTop();
+      document.documentElement.classList.remove('is-navigating');
     }, VIEW_TRANSITION_MS);
   }
 

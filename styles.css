@@ -29,7 +29,11 @@
 
 html {
   font-size: 16px;
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
+}
+
+html.is-navigating {
+  overflow: hidden;
 }
 
 body {
@@ -192,28 +196,29 @@ body {
   min-height: 100vh;
   position: relative;
   z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
 }
 
 .view {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  min-height: 100vh;
   display: none;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 2rem;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(14px) scale(0.992);
+  transform: translateY(10px);
   transition:
     opacity var(--view-duration) var(--view-ease-enter),
     transform var(--view-duration) var(--view-ease-enter),
     visibility 0s linear var(--view-duration);
   pointer-events: none;
-  will-change: opacity, transform;
 }
 
 .view-active,
@@ -226,7 +231,7 @@ body {
 .view-active {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0) scale(1);
+  transform: translateY(0);
   pointer-events: auto;
   position: relative;
   width: 100%;
@@ -239,12 +244,14 @@ body {
 
 .view-exit {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   width: 100%;
   min-height: 100vh;
   opacity: 0;
   visibility: visible;
-  transform: translateY(-8px) scale(0.996);
+  transform: translateY(-6px);
   pointer-events: none;
   transition:
     opacity var(--view-duration-exit) var(--view-ease-exit),
@@ -254,18 +261,20 @@ body {
 
 .view-enter {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   width: 100%;
   min-height: 100vh;
   opacity: 0;
   visibility: visible;
-  transform: translateY(18px) scale(0.992);
+  transform: translateY(10px);
   pointer-events: none;
 }
 
 .view-enter-active {
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: translateY(0);
   transition:
     opacity var(--view-duration) var(--view-ease-enter) var(--view-enter-delay),
     transform var(--view-duration) var(--view-ease-enter) var(--view-enter-delay),
@@ -275,11 +284,9 @@ body {
 @keyframes contentFadeUp {
   from {
     opacity: 0;
-    transform: translateY(14px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -326,7 +333,7 @@ body {
   }
 
   .view {
-    will-change: auto;
+    transform: none;
   }
 
   #categories.view-enter-active .category-card,
@@ -405,15 +412,29 @@ dialog:not([open]) {
 }
 
 /* Categories page */
-#categories {
+#welcome.view-active,
+#categories.view-active {
   justify-content: center;
+}
+
+#categories {
+  justify-content: flex-start;
   max-width: 980px;
   margin: 0 auto;
   width: 100%;
 }
 
-#gallery {
+#categories.view-enter,
+#categories.view-enter-active,
+#categories.view-exit {
   justify-content: center;
+}
+
+#gallery.view-enter,
+#gallery.view-enter-active,
+#gallery.view-exit,
+#gallery.view-active {
+  justify-content: flex-start;
   max-width: 1080px;
   margin: 0 auto;
   width: 100%;
@@ -434,12 +455,11 @@ dialog:not([open]) {
   font-weight: 600;
   letter-spacing: -0.02em;
   text-align: center;
-  transition: opacity 0.55s var(--content-ease), transform 0.55s var(--content-ease);
+  transition: opacity 0.55s var(--content-ease);
 }
 
 .page-header h2.is-updating {
   opacity: 0;
-  transform: translateY(6px);
 }
 
 .page-header--centered h2 {
