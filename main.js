@@ -89,7 +89,9 @@ const PORTFOLIO = {
 
     let currentView = 'welcome';
     let currentCategory = null;
-    const VIEW_TRANSITION_MS = 720;
+    let isViewTransitioning = false;
+    const VIEW_TRANSITION_MS = 1220;
+    const VIEW_ENTER_ACTIVE_DELAY_MS = 140;
 
   function sizeMediaFrame(wrapper, mediaW, mediaH) {
     if (!mediaW || !mediaH) return;
@@ -120,27 +122,43 @@ const PORTFOLIO = {
     wrapper.style.aspectRatio = '';
   }
 
+  function setGalleryTitle(text) {
+    if (!galleryTitle) return;
+    if (galleryTitle.textContent === text) return;
+
+    galleryTitle.classList.add('is-updating');
+    window.setTimeout(() => {
+      galleryTitle.textContent = text;
+      galleryTitle.classList.remove('is-updating');
+    }, 320);
+  }
+
   function navigateTo(viewName) {
-    if (viewName === currentView) return;
+    if (viewName === currentView || isViewTransitioning) return;
 
     const from = views[currentView];
     const to = views[viewName];
     if (!from || !to) return;
 
+    isViewTransitioning = true;
     to.classList.add('view-enter');
     to.getBoundingClientRect();
 
     requestAnimationFrame(() => {
       from.classList.remove('view-active');
       from.classList.add('view-exit');
-      to.classList.add('view-enter-active');
     });
+
+    window.setTimeout(() => {
+      to.classList.add('view-enter-active');
+    }, VIEW_ENTER_ACTIVE_DELAY_MS);
 
     window.setTimeout(() => {
       from.classList.remove('view-exit');
       to.classList.remove('view-enter', 'view-enter-active');
       to.classList.add('view-active');
       currentView = viewName;
+      isViewTransitioning = false;
     }, VIEW_TRANSITION_MS);
   }
 
@@ -149,7 +167,7 @@ const PORTFOLIO = {
     if (!category) return;
 
     currentCategory = categoryKey;
-    galleryTitle.textContent = category.title;
+    setGalleryTitle(category.title);
     renderGallery(category, categoryKey);
     navigateTo('gallery');
   }
@@ -165,10 +183,11 @@ const PORTFOLIO = {
       return;
     }
 
-    category.items.forEach((item) => {
+    category.items.forEach((item, index) => {
       const el = document.createElement('article');
       el.className = 'gallery-item';
       el.dataset.id = item.id;
+      el.style.setProperty('--stagger', String(Math.min(index, 14)));
 
       let thumbClass = '';
       let thumbContent = '';
