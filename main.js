@@ -89,6 +89,7 @@ const PORTFOLIO = {
 
     let currentView = 'welcome';
     let currentCategory = null;
+    const VIEW_TRANSITION_MS = 720;
 
   function sizeMediaFrame(wrapper, mediaW, mediaH) {
     if (!mediaW || !mediaH) return;
@@ -124,15 +125,23 @@ const PORTFOLIO = {
 
     const from = views[currentView];
     const to = views[viewName];
+    if (!from || !to) return;
 
-    from.classList.add('view-exit');
-    from.classList.remove('view-active');
+    to.classList.add('view-enter');
+    to.getBoundingClientRect();
 
-    setTimeout(() => {
+    requestAnimationFrame(() => {
+      from.classList.remove('view-active');
+      from.classList.add('view-exit');
+      to.classList.add('view-enter-active');
+    });
+
+    window.setTimeout(() => {
       from.classList.remove('view-exit');
+      to.classList.remove('view-enter', 'view-enter-active');
       to.classList.add('view-active');
       currentView = viewName;
-    }, 300);
+    }, VIEW_TRANSITION_MS);
   }
 
   function openCategory(categoryKey) {
